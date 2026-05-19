@@ -48,7 +48,7 @@
     "vitest": "^3.0.0"
   },
   "peerDependencies": {
-    "vcon-js": "^0.2.0"
+    "vcon-js": "^0.3.0"
   },
   "peerDependenciesMeta": {
     "vcon-js": {

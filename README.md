@@ -8,7 +8,7 @@ This proxy wraps any MCP server to automatically capture all communication betwe
 
 ```
 ┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
-│   MCP Client    │────▶│  vCon MCP Proxy    │────▶│   MCP Server    │
+│   MCP Client    │────▶│    vCon MCP Proxy    │────▶│   MCP Server    │
 │  (Claude, etc)  │◀────│                      │◀────│  (any server)   │
 └─────────────────┘     │  - Intercepts msgs   │     └─────────────────┘
                         │  - Builds vCon       │
@@ -49,7 +49,7 @@ const server = new Server(
 server.setRequestHandler(/* ... */);
 
 // Create the vCon MCP proxy
-const adapter = new VconMcpProxy({
+const proxy = new VconMcpProxy({
   conserver: {
     url: 'http://localhost:8000/api/vcon',
     apiToken: process.env.CONSERVER_API_TOKEN,
@@ -61,14 +61,14 @@ const adapter = new VconMcpProxy({
 
 // Create and wrap the transport
 const transport = new StdioServerTransport();
-const wrappedTransport = adapter.wrapTransport(transport);
+const wrappedTransport = proxy.wrapTransport(transport);
 
 // Connect with wrapped transport
 await server.connect(wrappedTransport);
 
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
-  await adapter.shutdown();
+  await proxy.shutdown();
   process.exit(0);
 });
 ```
@@ -78,7 +78,7 @@ process.on('SIGINT', async () => {
 ### Full Configuration Options
 
 ```typescript
-const adapter = new VconMcpProxy({
+const proxy = new VconMcpProxy({
   // Required: Conserver settings
   conserver: {
     url: 'http://localhost:8000/api/vcon',  // Required
@@ -132,24 +132,24 @@ The proxy emits events you can listen to:
 
 ```typescript
 // Session started
-adapter.on('session:start', (session) => {
+proxy.on('session:start', (session) => {
   console.log(`Session started: ${session.id}`);
 });
 
 // Session ended
-adapter.on('session:end', (session) => {
+proxy.on('session:end', (session) => {
   console.log(`Session ended: ${session.id}`);
   console.log('Stats:', session.getStats());
 });
 
 // vCon created from session
-adapter.on('vcon:created', (vcon, session) => {
+proxy.on('vcon:created', (vcon, session) => {
   console.log(`vCon created: ${vcon.uuid}`);
   console.log(`Dialog count: ${vcon.dialog.length}`);
 });
 
 // vCon posted to conserver
-adapter.on('vcon:posted', (result, vcon) => {
+proxy.on('vcon:posted', (result, vcon) => {
   if (result.success) {
     console.log(`Posted: ${vcon.uuid}`);
   } else {
@@ -158,7 +158,7 @@ adapter.on('vcon:posted', (result, vcon) => {
 });
 
 // Error during vCon processing
-adapter.on('vcon:error', (error, session) => {
+proxy.on('vcon:error', (error, session) => {
   console.error(`Error for session ${session.id}:`, error);
 });
 ```

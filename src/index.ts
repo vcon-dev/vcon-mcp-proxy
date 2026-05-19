@@ -14,7 +14,7 @@
  * const server = new Server({ name: 'my-server', version: '1.0.0' }, { ... });
  *
  * // Create the vCon MCP proxy
- * const adapter = new VconMcpProxy({
+ * const proxy = new VconMcpProxy({
  *   conserver: {
  *     url: 'http://localhost:8000/api/vcon',
  *     apiToken: process.env.CONSERVER_TOKEN,
@@ -26,14 +26,14 @@
  *
  * // Create and wrap the transport
  * const transport = new StdioServerTransport();
- * const wrappedTransport = adapter.wrapTransport(transport);
+ * const wrappedTransport = proxy.wrapTransport(transport);
  *
  * // Connect with wrapped transport
  * await server.connect(wrappedTransport);
  *
  * // On shutdown, end all sessions
  * process.on('SIGINT', async () => {
- *   await adapter.shutdown();
+ *   await proxy.shutdown();
  *   process.exit(0);
  * });
  * ```

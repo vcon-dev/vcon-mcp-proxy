@@ -8,7 +8,7 @@ Create a JavaScript/TypeScript proxy that wraps any MCP server to automatically 
 
 ```
 ┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
-│   MCP Client    │────▶│  vCon MCP Proxy    │────▶│   MCP Server    │
+│   MCP Client    │────▶│    vCon MCP Proxy    │────▶│   MCP Server    │
 │  (Claude, etc)  │◀────│                      │◀────│  (any server)   │
 └─────────────────┘     │  - Intercepts msgs   │     └─────────────────┘
                         │  - Builds vCon       │
@@ -206,7 +206,7 @@ vcon-mcp-proxy/
 ```json
 {
   "dependencies": {
-    "vcon-js": "^0.2.0",
+    "vcon-js": "^0.3.0",
     "@modelcontextprotocol/sdk": "^1.19.1",
     "zod": "^3.25.0"
   },
@@ -221,7 +221,7 @@ vcon-mcp-proxy/
 ## Configuration Example
 
 ```typescript
-const adapter = new VconMcpProxy({
+const proxy = new VconMcpProxy({
   // Conserver settings
   conserver: {
     url: 'http://localhost:8000/api/vcon',
