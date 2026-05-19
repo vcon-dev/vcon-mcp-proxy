@@ -117,34 +117,37 @@ Create a JavaScript/TypeScript proxy that wraps any MCP server to automatically 
 ```
 vcon-mcp-proxy/
 ├── src/
-│   ├── index.ts                 # Main entry point and exports
-│   ├── adapter/
-│   │   ├── index.ts             # VconMcpProxy main class
-│   │   └── config.ts            # Configuration types and defaults
+│   ├── index.ts                       # Main entry point and exports
+│   ├── proxy/
+│   │   ├── index.ts                   # VconMcpProxy main class
+│   │   └── config.ts                  # Configuration types and defaults
 │   ├── transport/
-│   │   ├── index.ts             # Transport wrapper exports
-│   │   ├── stdio-wrapper.ts     # STDIO transport wrapper
-│   │   └── http-wrapper.ts      # HTTP transport wrapper
+│   │   ├── index.ts                   # Transport wrapper exports
+│   │   ├── intercepting-transport.ts  # Wraps an MCP Transport to capture messages
+│   │   ├── message-parser.ts          # JSON-RPC message classification
+│   │   └── stdio-wrapper.ts           # STDIO stream wrapper utilities
 │   ├── session/
-│   │   ├── index.ts             # Session manager exports
-│   │   ├── session-manager.ts   # Manages multiple sessions
-│   │   └── session.ts           # Individual session state
+│   │   ├── index.ts                   # Session manager exports
+│   │   ├── session-manager.ts         # Manages multiple sessions
+│   │   └── session.ts                 # Individual session state
 │   ├── vcon/
-│   │   ├── index.ts             # vCon builder exports
-│   │   ├── builder.ts           # VconBuilder class
-│   │   └── mcp-mapper.ts        # MCP to vCon mapping logic
+│   │   ├── index.ts                   # vCon builder exports
+│   │   ├── builder.ts                 # VconBuilder class
+│   │   └── mcp-mapper.ts              # MCP-to-vCon mapping (core-02 / 0.4.0)
 │   └── conserver/
-│       ├── index.ts             # Conserver client exports
-│       └── client.ts            # HTTP client for conserver
+│       ├── index.ts                   # Conserver client exports
+│       └── client.ts                  # HTTP client for conserver
 ├── examples/
-│   ├── wrap-existing-server.ts  # Example: wrap existing MCP server
-│   ├── standalone-proxy.ts      # Example: standalone proxy mode
-│   └── with-vcon-mcp.ts         # Example: integration with vcon-mcp
+│   ├── wrap-existing-server.ts        # Wrap an existing MCP server
+│   ├── manual-session.ts              # Drive SessionManager + VconBuilder directly
+│   └── with-vcon-mcp.ts               # Integration with vcon-mcp
 ├── tests/
 │   ├── proxy.test.ts
 │   ├── session.test.ts
+│   ├── transport.test.ts
 │   ├── vcon-builder.test.ts
-│   └── conserver-client.test.ts
+│   ├── conserver-client.test.ts
+│   └── integration.test.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -244,41 +247,30 @@ const adapter = new VconMcpProxy({
 });
 ```
 
-## Usage Examples
-
-### Wrap Existing MCP Server (Programmatic)
+## Usage Example: Wrap Existing MCP Server
 
 ```typescript
 import { VconMcpProxy } from 'vcon-mcp-proxy';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 // Create your MCP server
 const server = new Server({ name: 'my-server', version: '1.0.0' }, { ... });
 
 // Wrap with vCon MCP proxy
-const adapter = new VconMcpProxy({
+const proxy = new VconMcpProxy({
   conserver: { url: 'http://localhost:8000/api/vcon' }
 });
 
-// Start with wrapped transport
-const wrappedTransport = adapter.wrapStdioTransport();
+// Wrap the transport and connect
+const transport = new StdioServerTransport();
+const wrappedTransport = proxy.wrapTransport(transport);
 await server.connect(wrappedTransport);
 ```
 
-### Standalone Proxy Mode
-
-```typescript
-import { VconMcpProxy } from 'vcon-mcp-proxy';
-
-// Proxy between client and any MCP server
-const proxy = new VconMcpProxy({
-  conserver: { url: 'http://localhost:8000/api/vcon' },
-  targetCommand: 'node',
-  targetArgs: ['/path/to/mcp-server/index.js'],
-});
-
-await proxy.start();
-```
+See `examples/wrap-existing-server.ts` for the full version, and
+`examples/manual-session.ts` for driving `SessionManager` + `VconBuilder`
+directly without an MCP transport.
 
 ## Session Lifecycle
 
