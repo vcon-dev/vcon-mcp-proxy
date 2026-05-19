@@ -1,0 +1,58 @@
+{
+  "name": "vcon-mcp-proxy",
+  "version": "0.1.0",
+  "description": "Proxy to capture MCP sessions as vCons and post to a conserver",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./proxy": "./dist/proxy/index.js",
+    "./session": "./dist/session/index.js",
+    "./transport": "./dist/transport/index.js",
+    "./vcon": "./dist/vcon/index.js",
+    "./conserver": "./dist/conserver/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src/**/*.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "vcon",
+    "mcp",
+    "model-context-protocol",
+    "conversation",
+    "proxy",
+    "conserver"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.19.1",
+    "uuid": "^9.0.1",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/uuid": "^10.0.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "typescript": "^5.9.0",
+    "vitest": "^3.0.0"
+  },
+  "peerDependencies": {
+    "vcon-js": "^0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "vcon-js": {
+      "optional": true
+    }
+  }
+}

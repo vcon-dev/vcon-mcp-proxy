@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "vconic-skills": {
+      "source": {
+        "source": "github",
+        "repo": "vconic/claude-skills"
+      }
+    }
+  }
+}
