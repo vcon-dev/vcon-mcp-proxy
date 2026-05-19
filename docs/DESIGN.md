@@ -1,8 +1,11 @@
-# vCon MCP Proxy Plan
+# vCon MCP Proxy Design
+
+> Architecture reference for `vcon-mcp-proxy`. For installation, quick start,
+> and API surface, see the top-level [README.md](../README.md).
 
 ## Overview
 
-Create a JavaScript/TypeScript proxy that wraps any MCP server to automatically capture MCP sessions as vCons and post them to a conserver. The proxy acts as middleware between MCP clients and servers, intercepting all tool calls and responses to build a complete conversation record.
+`vcon-mcp-proxy` is a JavaScript/TypeScript proxy that wraps any MCP server to automatically capture MCP sessions as vCons and post them to a conserver. The proxy acts as middleware between MCP clients and servers, intercepting all tool calls and responses to build a complete conversation record per IETF vCon core-02 (syntax `0.4.0`).
 
 ## Architecture
 
@@ -152,54 +155,6 @@ vcon-mcp-proxy/
 ├── tsconfig.json
 └── README.md
 ```
-
-## Implementation Steps
-
-### Step 1: Project Setup
-- Initialize npm project with TypeScript
-- Add dependencies: `vcon-js`, `@modelcontextprotocol/sdk`, `zod`
-- Configure TypeScript for ES modules
-
-### Step 2: Configuration System (`src/proxy/config.ts`)
-- Define proxy configuration interface
-- Conserver URL, API token, ingress list
-- Session timeout, buffer size limits
-- Optional filtering rules (which tools to capture)
-
-### Step 3: Session Management (`src/session/`)
-- SessionManager: Map of session ID to Session objects
-- Session: Message buffer, start time, parties info
-- Auto-finalize sessions after timeout or explicit end
-
-### Step 4: Transport Wrappers (`src/transport/`)
-- StdioTransportWrapper: Intercepts stdin/stdout
-- Create proxy streams that capture + forward messages
-- Parse JSON-RPC messages to identify types
-
-### Step 5: vCon Builder (`src/vcon/`)
-- Use vcon-js library to create compliant vCons
-- Map MCP message types to dialog entries
-- Add session metadata as tags and analysis
-
-### Step 6: Conserver Client (`src/conserver/`)
-- HTTP POST to conserver API
-- Handle authentication headers
-- Retry logic with exponential backoff
-
-### Step 7: Main Proxy (`src/proxy/index.ts`)
-- Combine all components
-- Provide simple API for wrapping MCP servers
-- Event emitters for session lifecycle
-
-### Step 8: Testing
-- Unit tests for each component
-- Integration tests with mock MCP server
-- Test vCon compliance
-
-### Step 9: Examples and Documentation
-- Working examples for common use cases
-- README with setup instructions
-- API documentation
 
 ## Dependencies
 

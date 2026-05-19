@@ -6,6 +6,8 @@ Proxy to capture MCP (Model Context Protocol) sessions as vCons and post them to
 
 This proxy wraps any MCP server to automatically capture all communication between MCP clients (like Claude Desktop) and servers. Each session is converted into an IETF-compliant vCon (Virtual Conversation) and posted to a conserver.
 
+Output conforms to **vCon core-02 (syntax `0.4.0`)**. This package is the reference implementation for [`draft-howe-vcon-mcp-session`](https://github.com/vcon-dev/draft-howe-vcon-mcp-session), the IETF draft describing how to record MCP sessions as vCons.
+
 ```
 ┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
 │   MCP Client    │────▶│    vCon MCP Proxy    │────▶│   MCP Server    │
@@ -74,6 +76,8 @@ process.on('SIGINT', async () => {
 ```
 
 ## Configuration
+
+The only required field is `conserver.url`. Everything else has a sensible default.
 
 ### Full Configuration Options
 
@@ -289,6 +293,10 @@ HTTP client for conserver.
 - `post(vcon)` - Post vCon to conserver
 - `healthCheck()` - Check conserver health
 
+## Design
+
+See [docs/DESIGN.md](docs/DESIGN.md) for architecture, component breakdown, vCon-mapping rules, session lifecycle, and error-handling design.
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
