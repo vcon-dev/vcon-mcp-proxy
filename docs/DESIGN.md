@@ -161,7 +161,7 @@ vcon-mcp-proxy/
 ```json
 {
   "dependencies": {
-    "vcon-js": "^0.3.0",
+    "vcon-js": "^0.4.0",
     "@modelcontextprotocol/sdk": "^1.19.1",
     "zod": "^3.25.0"
   },

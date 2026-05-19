@@ -18,6 +18,12 @@ vCon to a conserver.
 
 ### Added
 
+- Optional peer dependency on `vcon-js` `^0.4.0` — the first vcon-js
+  release whose constructor matches the core-02 wire shape this proxy
+  emits (no top-level `tags`, no legacy `attachment.type`, `party`/`dialog`
+  default to `0`). Earlier vcon-js versions would re-inject a stray
+  top-level `tags: {}` if you round-tripped output through
+  `new Vcon(data)`.
 - `VconMcpProxy` class that wraps any MCP `Transport` via
   `wrapTransport(transport, sessionId?)`.
 - `SessionManager`, `Session`, `VconBuilder`, and `ConserverClient`
