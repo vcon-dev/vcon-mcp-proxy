@@ -99,7 +99,7 @@ export {
   mapParty,
   mapMessageToDialog,
   createSessionAnalysis,
-  createTags,
+  createTagsAttachment,
   extractToolNames,
   extractResourceUris,
 } from './vcon/index.js';

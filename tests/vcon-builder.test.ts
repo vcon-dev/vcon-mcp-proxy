@@ -10,7 +10,7 @@ import {
   mapParty,
   mapMessageToDialog,
   createSessionAnalysis,
-  createTags,
+  createTagsAttachment,
   extractToolNames,
   extractResourceUris,
 } from '../src/vcon/index.js';
@@ -68,7 +68,7 @@ describe('VconBuilder', () => {
       const vcon = builder.build(session);
 
       expect(vcon.uuid).toBe(session.uuid);
-      expect(vcon.vcon).toBe('0.0.1');
+      expect(vcon.vcon).toBe('0.4.0');
       expect(vcon.created_at).toBeDefined();
       expect(vcon.parties).toHaveLength(2);
       expect(vcon.dialog).toHaveLength(2);
@@ -95,12 +95,19 @@ describe('VconBuilder', () => {
       expect(vcon.analysis).toBeUndefined();
     });
 
-    it('should include custom tags', () => {
+    it('should include custom tags in the tags attachment', () => {
       session.addMessage('request', { method: 'test' });
       const vcon = builder.build(session);
 
-      expect(vcon.tags?.environment).toBe('test');
-      expect(vcon.tags?.server_name).toBe('test-server');
+      const tagsAttachment = vcon.attachments?.find((a) => a.purpose === 'tags');
+      expect(tagsAttachment).toBeDefined();
+      expect(tagsAttachment!.party).toBe(0);
+      expect(tagsAttachment!.dialog).toBe(0);
+      expect(tagsAttachment!.encoding).toBe('json');
+
+      const tags = JSON.parse(tagsAttachment!.body) as string[];
+      expect(tags).toContain('environment:test');
+      expect(tags).toContain('server_name:test-server');
     });
   });
 
@@ -297,18 +304,25 @@ describe('extractResourceUris', () => {
   });
 });
 
-describe('createTags', () => {
-  it('should create tags with session info', () => {
+describe('createTagsAttachment', () => {
+  it('should build a spec-compliant tags attachment', () => {
     const session = new Session(defaultSessionConfig);
     session.addMessage('request', { method: 'tools/call', params: { name: 'my_tool' } });
 
-    const tags = createTags(session, defaultVconConfig);
+    const attachment = createTagsAttachment(session, defaultVconConfig);
 
-    expect(tags.source).toBe('mcp-proxy');
-    expect(tags.server_name).toBe('test-server');
-    expect(tags.server_version).toBe('1.0.0');
-    expect(tags.session_id).toBe(session.id);
-    expect(tags.environment).toBe('test');
+    // Spec-required shape (vCon core-02)
+    expect(attachment.purpose).toBe('tags');
+    expect(attachment.party).toBe(0);
+    expect(attachment.dialog).toBe(0);
+    expect(attachment.encoding).toBe('json');
+
+    const tags = JSON.parse(attachment.body) as string[];
+    expect(tags).toContain('source:mcp-proxy');
+    expect(tags).toContain('server_name:test-server');
+    expect(tags).toContain('server_version:1.0.0');
+    expect(tags).toContain(`session_id:${session.id}`);
+    expect(tags).toContain('environment:test');
 
     session.dispose();
   });
@@ -346,7 +360,7 @@ describe('mapSessionToVcon', () => {
 
     // Check structure
     expect(vcon.uuid).toBe(session.uuid);
-    expect(vcon.vcon).toBe('0.0.1');
+    expect(vcon.vcon).toBe('0.4.0');
     expect(vcon.subject).toContain('test-server');
 
     // Check parties
@@ -362,8 +376,11 @@ describe('mapSessionToVcon', () => {
     // Check analysis
     expect(vcon.analysis).toHaveLength(1);
 
-    // Check tags
-    expect(vcon.tags?.tool_count).toBe('1');
+    // Check tags attachment
+    const tags = JSON.parse(
+      vcon.attachments!.find((a) => a.purpose === 'tags')!.body
+    ) as string[];
+    expect(tags).toContain('tool_count:1');
 
     session.dispose();
   });

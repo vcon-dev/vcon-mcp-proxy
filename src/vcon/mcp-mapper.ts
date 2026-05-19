@@ -42,16 +42,20 @@ export interface VconAnalysis {
 }
 
 /**
- * vCon attachment entry
+ * vCon attachment entry (vCon core-02 / syntax 0.4.0)
+ *
+ * Per spec, `purpose` is required and replaces the legacy `type` field.
+ * `party` and `dialog` indices are required; use 0 for vCon-level attachments
+ * not tied to a specific party or dialog turn.
  */
 export interface VconAttachment {
-  type: string;
-  purpose?: string;
+  purpose: string;
+  party: number | number[];
+  dialog: number | number[];
   body: string;
   encoding: 'json' | 'base64url';
   mediatype?: string;
   filename?: string;
-  dialog?: number | number[];
 }
 
 /**
@@ -67,7 +71,6 @@ export interface VconData {
   dialog: VconDialog[];
   analysis?: VconAnalysis[];
   attachments?: VconAttachment[];
-  tags?: Record<string, string>;
 }
 
 /**
@@ -177,17 +180,22 @@ export function extractResourceUris(messages: CapturedMessage[]): string[] {
 }
 
 /**
- * Create tags for the vCon
+ * Build the tags attachment for the vCon.
+ *
+ * Per vCon core-02, tags live in an attachment with `purpose: "tags"`,
+ * not as a top-level object. Body is a JSON-encoded array of "key:value"
+ * strings, matching the de-facto format produced by vcon-lib's `add_tag`
+ * helper. Use `party: 0, dialog: 0` to indicate a vCon-level attachment.
  */
-export function createTags(
+export function createTagsAttachment(
   session: Session,
   config: VconConfig
-): Record<string, string> {
+): VconAttachment {
   const stats = session.getStats();
   const toolNames = extractToolNames(session.messages);
   const resourceUris = extractResourceUris(session.messages);
 
-  return {
+  const tagMap: Record<string, string> = {
     source: 'mcp-proxy',
     server_name: config.serverName,
     ...(config.serverVersion && { server_version: config.serverVersion }),
@@ -197,6 +205,16 @@ export function createTags(
     ...(toolNames.length > 0 && { tools_used: toolNames.join(',') }),
     ...(resourceUris.length > 0 && { resources_accessed: resourceUris.slice(0, 5).join(',') }),
     ...config.tags,
+  };
+
+  const entries = Object.entries(tagMap).map(([k, v]) => `${k}:${v}`);
+
+  return {
+    purpose: 'tags',
+    party: 0,
+    dialog: 0,
+    body: JSON.stringify(entries),
+    encoding: 'json',
   };
 }
 
@@ -221,16 +239,16 @@ export function mapSessionToVcon(
     return mapMessageToDialog(message, partyIndex);
   });
 
-  // Create vCon structure
+  // Create vCon structure (vCon core-02, syntax 0.4.0)
   const vcon: VconData = {
     uuid: session.uuid,
-    vcon: '0.0.1',
+    vcon: '0.4.0',
     created_at: session.startedAt.toISOString(),
     updated_at: (session.endedAt || new Date()).toISOString(),
     subject: `MCP Session: ${config.serverName}`,
     parties,
     dialog,
-    tags: createTags(session, config),
+    attachments: [createTagsAttachment(session, config)],
   };
 
   // Add analysis if configured

@@ -151,7 +151,7 @@ describe('Integration: Full MCP Session Flow', () => {
     const vcon = postedVcons[0];
 
     // Verify vCon structure
-    expect(vcon.vcon).toBe('0.0.1');
+    expect(vcon.vcon).toBe('0.4.0');
     expect(vcon.uuid).toBeDefined();
     expect(vcon.created_at).toBeDefined();
 
@@ -174,10 +174,15 @@ describe('Integration: Full MCP Session Flow', () => {
     expect(analysisBody.tool_calls).toBe(1);
     expect(analysisBody.message_count).toBe(7);
 
-    // Verify tags
-    expect(vcon.tags?.server_name).toBe('integration-test-server');
-    expect(vcon.tags?.test).toBe('integration');
-    expect(vcon.tags?.tools_used).toBe('search_files');
+    // Verify tags attachment (vCon core-02: tags live in attachments[], not top-level)
+    const tagsAttachment = vcon.attachments?.find((a) => a.purpose === 'tags');
+    expect(tagsAttachment).toBeDefined();
+    expect(tagsAttachment!.party).toBe(0);
+    expect(tagsAttachment!.dialog).toBe(0);
+    const tags = JSON.parse(tagsAttachment!.body) as string[];
+    expect(tags).toContain('server_name:integration-test-server');
+    expect(tags).toContain('test:integration');
+    expect(tags).toContain('tools_used:search_files');
   });
 
   it('should handle multiple concurrent sessions', async () => {
@@ -271,8 +276,11 @@ describe('Integration: Full MCP Session Flow', () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     const vcon = postedVcons[0];
-    expect(vcon.tags?.resource_count).toBe('2');
-    expect(vcon.tags?.resources_accessed).toContain('file:///test.txt');
+    const tags = JSON.parse(
+      vcon.attachments!.find((a) => a.purpose === 'tags')!.body
+    ) as string[];
+    expect(tags).toContain('resource_count:2');
+    expect(tags.some((t) => t.startsWith('resources_accessed:') && t.includes('file:///test.txt'))).toBe(true);
   });
 
   it('should include correct timestamps', async () => {

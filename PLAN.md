@@ -54,7 +54,7 @@ Create a JavaScript/TypeScript proxy that wraps any MCP server to automatically 
 ```json
 {
   "uuid": "generated-uuid",
-  "vcon": "0.0.1",
+  "vcon": "0.4.0",
   "created_at": "2025-01-15T10:00:00Z",
   "subject": "MCP Session: vcon-mcp-server",
   "parties": [
@@ -100,11 +100,15 @@ Create a JavaScript/TypeScript proxy that wraps any MCP server to automatically 
       "encoding": "json"
     }
   ],
-  "tags": {
-    "source": "mcp-proxy",
-    "server_name": "vcon-mcp",
-    "transport": "stdio"
-  }
+  "attachments": [
+    {
+      "purpose": "tags",
+      "party": 0,
+      "dialog": 0,
+      "encoding": "json",
+      "body": "[\"source:mcp-proxy\",\"server_name:vcon-mcp\",\"transport:stdio\"]"
+    }
+  ]
 }
 ```
 

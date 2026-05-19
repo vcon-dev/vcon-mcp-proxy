@@ -18,7 +18,7 @@ const defaultConfig: ConserverConfig = {
 
 const sampleVcon: VconData = {
   uuid: 'test-uuid-123',
-  vcon: '0.0.1',
+  vcon: '0.4.0',
   created_at: '2025-01-15T10:00:00Z',
   parties: [{ name: 'Test', role: 'user' }],
   dialog: [],

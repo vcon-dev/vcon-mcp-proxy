@@ -9,7 +9,7 @@ export {
   mapParty,
   mapMessageToDialog,
   createSessionAnalysis,
-  createTags,
+  createTagsAttachment,
   extractToolNames,
   extractResourceUris,
 } from './mcp-mapper.js';

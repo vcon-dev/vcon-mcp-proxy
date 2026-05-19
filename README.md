@@ -170,7 +170,7 @@ Each MCP session is converted to a vCon with the following structure:
 ```json
 {
   "uuid": "generated-uuid",
-  "vcon": "0.0.1",
+  "vcon": "0.4.0",
   "created_at": "2025-01-15T10:00:00Z",
   "subject": "MCP Session: my-server",
   "parties": [
@@ -205,16 +205,21 @@ Each MCP session is converted to a vCon with the following structure:
     {
       "type": "session_summary",
       "vendor": "vcon-mcp-proxy",
+      "product": "vcon-mcp-proxy",
       "dialog": [0, 1, 2],
       "body": "{\"tool_calls\":5,\"duration_ms\":1234}",
       "encoding": "json"
     }
   ],
-  "tags": {
-    "source": "mcp-proxy",
-    "server_name": "my-server",
-    "tool_count": "5"
-  }
+  "attachments": [
+    {
+      "purpose": "tags",
+      "party": 0,
+      "dialog": 0,
+      "encoding": "json",
+      "body": "[\"source:mcp-proxy\",\"server_name:my-server\",\"tool_count:5\"]"
+    }
+  ]
 }
 ```
 
